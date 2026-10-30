@@ -14,6 +14,7 @@ const DEFAULT_STORE = {
   staff: [],
   requests: [],
   submissions: [],
+  deletions: [],
   settings: {
     warnAt: 2,
     notice: '休み希望は、前の月の15日までに入れてください。入った希望は、みんなに見えます。',
@@ -32,6 +33,7 @@ function readStore() {
   if (!Array.isArray(parsed.staff)) parsed.staff = [];
   if (!Array.isArray(parsed.requests)) parsed.requests = [];
   if (!Array.isArray(parsed.submissions)) parsed.submissions = [];
+  if (!Array.isArray(parsed.deletions)) parsed.deletions = [];
   parsed.settings = Object.assign({}, DEFAULT_STORE.settings, parsed.settings || {});
   return parsed;
 }
@@ -69,6 +71,7 @@ function publicStore(store) {
     staff: store.staff,
     requests: store.requests,
     submissions: store.submissions,
+    deletions: store.deletions || [],
     settings: {
       warnAt: store.settings.warnAt,
       notice: store.settings.notice,
@@ -264,6 +267,24 @@ async function handleApi(req, res) {
             current.staff[next] = tmp;
           }
         }
+        return { ok: true };
+      }
+
+      if (url === '/api/remove') {
+        const by = cleanName(body.by);
+        if (!by) return { error: '削除する人の名前を入れてください。', status: 400, write: false };
+        if (!validDate(body.date)) return { error: '日付が正しくありません。', status: 400, write: false };
+        const staff = current.staff.find((s) => s.id === body.id);
+        const had = staff && current.requests.some((r) => r.staffId === staff.id && r.date === body.date);
+        if (!had) return { error: 'その名前の希望はありません。', status: 400, write: false };
+        current.requests = current.requests.filter((r) => !(r.staffId === staff.id && r.date === body.date));
+        current.deletions.push({
+          date: body.date,
+          name: staff.name,
+          by,
+          at: new Date().toISOString()
+        });
+        if (current.deletions.length > 100) current.deletions = current.deletions.slice(-100);
         return { ok: true };
       }
 

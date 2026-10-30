@@ -279,6 +279,34 @@
   .dock .date { margin: 0; font-size: 22px; font-weight: 800; }
   .dock .note { margin: 4px 0 8px; font-size: 17px; }
   .who-line { margin: 4px 0 8px; font-size: 18px; font-weight: 700; }
+  .person-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 8px 0;
+  }
+  .person-row .nm { font-size: 24px; font-weight: 800; min-width: 0; }
+  .person-row .btn { flex: none; min-width: 7em; }
+  .gone {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #fde8e8;
+    color: var(--danger);
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+  .cut {
+    display: block;
+    margin-top: 1px;
+    color: var(--danger);
+    font-size: min(10px, calc(100cqi / 4.2));
+    font-weight: 800;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
   .roster-list { display: flex; flex-direction: column; gap: 10px; }
   .roster-row { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
   .roster-row:last-child { border-bottom: 0; padding-bottom: 0; }
@@ -382,6 +410,7 @@
     .who { gap: 4px; margin-top: 2px; }
     .who .nm { font-size: 16px; white-space: normal; }
     .cmtbadge { width: 16px; height: 16px; }
+    .cut { font-size: 14px; }
     .mask { align-items: center; }
     .sheet { border-radius: 22px; margin: 16px; }
   }
@@ -426,6 +455,8 @@ let toastTimer = null;
 let settingsUnlocked = sessionStorage.getItem('karatsu-unlock') === '1';
 let editingId = null;
 let confirmDeleteId = null;
+let pendingDelete = null;
+let removeBy = '';
 let draftNotice = '';
 let lastJson = '';
 
@@ -569,6 +600,20 @@ function currentStaff() {
 function colorOf(id) {
   const index = state.staff.findIndex((s) => s.id === id);
   return COLORS[(index < 0 ? 0 : index) % COLORS.length];
+}
+
+function deletionsOn(date) {
+  return (state.deletions || []).filter((row) => row.date === date);
+}
+
+function goneText(row) {
+  if (row.name === row.by) return honorific(row.by) + 'が、自分の希望を削除しました。';
+  return honorific(row.name) + 'の希望を、' + honorific(row.by) + 'が削除しました。';
+}
+
+function goneShort(row) {
+  if (row.name === row.by) return row.by + 'が削除';
+  return row.name + 'を' + row.by + 'が削除';
 }
 
 function peopleOn(date) {
@@ -911,6 +956,7 @@ function calendarHtml() {
         '<span class="mid">' +
           (tags.length ? '<span class="tag">' + esc(tags.join('・')) + '</span>' : '') +
           names +
+          deletionsOn(date).map((row) => '<span class="cut">' + esc(goneShort(row)) + '</span>').join('') +
         '</span>' +
         '</div>';
     });
@@ -919,37 +965,57 @@ function calendarHtml() {
   return html + '</div>';
 }
 
+function peopleRows(date) {
+  const people = peopleOn(date);
+  if (!people.length) return '';
+  return '<p class="who-line">入っている人</p>' + people.map((p) =>
+    '<div class="person-row"><span class="nm">' + esc(honorific(p.name)) + '</span>' +
+    '<button type="button" class="btn danger" data-action="ask-remove" data-date="' + date + '" data-id="' + esc(p.id) + '" data-name="' + esc(p.name) + '"' +
+    (saving ? ' disabled' : '') + '>削除</button></div>'
+  ).join('');
+}
+
+function goneRows(date) {
+  return deletionsOn(date).map((row) => '<p class="gone">' + esc(goneText(row)) + '</p>').join('');
+}
+
+function removeBox() {
+  return '<form data-action="do-remove">' +
+    '<p class="who-line">' + esc(honorific(pendingDelete.name)) + 'の希望を削除します。</p>' +
+    '<label class="field">削除する人の名前<input id="remove-by" type="text" maxlength="16" autocomplete="off" value="' + esc(removeBy) + '"></label>' +
+    '<div class="row"><button class="btn danger" type="submit"' + (saving ? ' disabled' : '') + '>削除する</button>' +
+    '<button type="button" class="btn ghost" data-action="cancel-remove">やめる</button></div></form>';
+}
+
 function detailHtml() {
   const date = selected;
-  const people = peopleOn(date);
-  const mine = people.find((p) => p.name === draftName);
   const h = holidayOf(date);
   let note = '';
   if (isKunchi(date)) note += '<p class="note"><strong>唐津くんちの期間です。</strong>お店が忙しくなります。</p>';
   else if (h) note += '<p class="note">' + esc(h.full) + 'です。</p>';
+  const confirming = pendingDelete && pendingDelete.date === date;
+  let body = confirming ? removeBox() : peopleRows(date);
+  body += goneRows(date);
   if (isClosed(date)) {
     const due = deadlineDate(date);
     const [, m, d] = due.split('-').map(Number);
-    return '<div class="mask">' +
-      '<button type="button" class="backdrop" data-action="close-sheet" aria-label="閉じる"></button>' +
-      '<div class="sheet">' +
-      '<p class="date">' + esc(dayLabel(date)) + '</p>' + note +
-      '<p class="note">締め切りの' + m + '月' + d + '日（土）を過ぎているので、入力できません。</p>' +
-      '<button type="button" class="btn ghost block" data-action="close-sheet">閉じる</button>' +
-      '</div></div>';
+    body += '<p class="note">締め切りの' + m + '月' + d + '日（土）を過ぎているので、入力できません。</p>';
+  } else if (!confirming) {
+    const mine = peopleOn(date).some((p) => p.name === draftName);
+    const label = mine ? '内容を保存する' : 'この日を休み希望にする';
+    body += '<form id="detail" data-action="save-entry">' +
+      '<label class="field">名前<input id="entry-name" type="text" maxlength="16" autocomplete="off" value="' + esc(draftName) + '"></label>' +
+      '<label class="field">コメント（例）●時から●時まではOKですなど・・・<input id="entry-comment" type="text" maxlength="80" autocomplete="off" value="' + esc(draftComment) + '"></label>' +
+      '<div class="row"><button class="btn main grow" type="submit"' + (saving ? ' disabled' : '') + '>' + label + '</button></div>' +
+      '</form>';
   }
-  const label = mine ? '内容を保存する' : 'この日を休み希望にする';
   return '<div class="mask">' +
     '<button type="button" class="backdrop" data-action="close-sheet" aria-label="閉じる"></button>' +
-    '<form class="sheet" id="detail" data-action="save-entry">' +
+    '<div class="sheet">' +
     '<p class="date">' + esc(dayLabel(date)) + '</p>' + note +
-    '<label class="field">名前<input id="entry-name" type="text" maxlength="16" autocomplete="off" value="' + esc(draftName) + '"></label>' +
-    '<label class="field">コメント（例）●時から●時まではOKですなど・・・<input id="entry-comment" type="text" maxlength="80" autocomplete="off" value="' + esc(draftComment) + '"></label>' +
-    '<div class="row"><button class="btn main grow" type="submit"' + (saving ? ' disabled' : '') + '>' + label + '</button>' +
-    (mine ? '<button type="button" class="btn danger" data-action="remove-entry"' + (saving ? ' disabled' : '') + '>取り消す</button>' : '') +
-    '</div>' +
+    body +
     '<button type="button" class="btn ghost block" data-action="close-sheet">閉じる</button>' +
-    '</form></div>';
+    '</div></div>';
 }
 
 function commentHtml() {
@@ -1120,6 +1186,8 @@ document.getElementById('app').addEventListener('click', async (event) => {
   if (action === 'close-sheet') {
     sheet = null;
     peek = null;
+    pendingDelete = null;
+    removeBy = '';
     render();
     return;
   }
@@ -1130,35 +1198,25 @@ document.getElementById('app').addEventListener('click', async (event) => {
     entryBlank = true;
     sheet = 'entry';
     peek = null;
+    pendingDelete = null;
+    removeBy = '';
     render();
     const nameInput = document.getElementById('entry-name');
     if (nameInput) nameInput.focus();
     return;
   }
-  if (action === 'remove-entry') {
-    if (isClosed(selected)) {
-      showToast('この週は締め切りを過ぎているので、入れられません。');
-      return;
-    }
-    const nameEl = document.getElementById('entry-name');
-    const name = nameEl ? nameEl.value : draftName;
-    if (saving) return;
-    saving = true;
+  if (action === 'ask-remove') {
+    pendingDelete = { date: btn.dataset.date, id: btn.dataset.id, name: btn.dataset.name };
+    removeBy = '';
     render();
-    try {
-      state = await api('/api/entry', { name, date: selected, on: false });
-      lastJson = JSON.stringify(state);
-      draftName = String(name || '').trim();
-      draftComment = '';
-      localStorage.setItem('karatsu-name', draftName);
-      sheet = null;
-      showToast('希望を取り消しました');
-    } catch (err) {
-      showToast(err.message);
-    } finally {
-      saving = false;
-      render();
-    }
+    const input = document.getElementById('remove-by');
+    if (input) input.focus();
+    return;
+  }
+  if (action === 'cancel-remove') {
+    pendingDelete = null;
+    removeBy = '';
+    render();
     return;
   }
   if (action === 'edit') { editingId = btn.dataset.id; confirmDeleteId = null; render(); return; }
@@ -1215,6 +1273,31 @@ document.getElementById('app').addEventListener('submit', async (event) => {
   event.preventDefault();
   const action = form.dataset.action;
   try {
+    if (action === 'do-remove') {
+      const by = String(document.getElementById('remove-by').value || '').trim();
+      removeBy = by;
+      if (!by) {
+        showToast('削除する人の名前を入れてください。');
+        return;
+      }
+      if (!pendingDelete || saving) return;
+      const target = pendingDelete;
+      saving = true;
+      render();
+      try {
+        state = await api('/api/remove', { id: target.id, date: target.date, by });
+        lastJson = JSON.stringify(state);
+        pendingDelete = null;
+        removeBy = '';
+        showToast(goneText({ name: target.name, by }));
+      } catch (err) {
+        showToast(err.message);
+      } finally {
+        saving = false;
+        render();
+      }
+      return;
+    }
     if (action === 'save-entry') {
       if (isClosed(selected)) {
         showToast('この週は締め切りを過ぎているので、入れられません。');
