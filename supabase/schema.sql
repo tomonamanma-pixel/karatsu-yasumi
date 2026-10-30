@@ -40,7 +40,6 @@ declare
   n int;
   notice text;
   has_row boolean;
-  by_name text;
 begin
   if payload is null then
     payload := '{}'::jsonb;
@@ -237,12 +236,9 @@ begin
     end if;
 
   elsif action = 'remove' then
-    by_name := left(btrim(regexp_replace(coalesce(payload->>'by', ''), '[\x00-\x1F]', '', 'g')), 16);
     dt := coalesce(payload->>'date', '');
     sid := coalesce(payload->>'id', '');
-    if by_name = '' then
-      err := '削除する人の名前を入れてください。';
-    elsif dt !~ '^\d{4}-\d{2}-\d{2}$' then
+    if dt !~ '^\d{4}-\d{2}-\d{2}$' then
       err := '日付が正しくありません。';
     else
       begin
@@ -270,21 +266,7 @@ begin
         from jsonb_array_elements(requests) r
         where not (r->>'staffId' = sid and r->>'date' = dt);
         requests := next_json;
-        deletions := deletions || jsonb_build_array(jsonb_build_object(
-          'date', dt,
-          'name', name,
-          'by', by_name,
-          'at', to_char(now() at time zone 'Asia/Tokyo', 'YYYY-MM-DD"T"HH24:MI:SS')
-        ));
-        if jsonb_array_length(deletions) > 100 then
-          select coalesce(jsonb_agg(d order by n), '[]'::jsonb) into next_json
-          from (
-            select d, n
-            from jsonb_array_elements(deletions) with ordinality as t(d, n)
-            where n > jsonb_array_length(deletions) - 100
-          ) q;
-          deletions := next_json;
-        end if;
+        deletions := '[]'::jsonb;
       end if;
     end if;
 

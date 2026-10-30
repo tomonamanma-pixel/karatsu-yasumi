@@ -288,25 +288,7 @@
   }
   .person-row .nm { font-size: 24px; font-weight: 800; min-width: 0; }
   .person-row .btn { flex: none; min-width: 7em; }
-  .gone {
-    margin: 10px 0;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: #fde8e8;
-    color: var(--danger);
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 1.4;
-  }
-  .cut {
-    display: block;
-    margin-top: 1px;
-    color: var(--danger);
-    font-size: min(10px, calc(100cqi / 4.2));
-    font-weight: 800;
-    line-height: 1.15;
-    overflow-wrap: anywhere;
-  }
+  .confirm-q { margin: 8px 0 14px; font-size: 24px; font-weight: 800; line-height: 1.4; }
   .roster-list { display: flex; flex-direction: column; gap: 10px; }
   .roster-row { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
   .roster-row:last-child { border-bottom: 0; padding-bottom: 0; }
@@ -410,7 +392,6 @@
     .who { gap: 4px; margin-top: 2px; }
     .who .nm { font-size: 16px; white-space: normal; }
     .cmtbadge { width: 16px; height: 16px; }
-    .cut { font-size: 14px; }
     .mask { align-items: center; }
     .sheet { border-radius: 22px; margin: 16px; }
   }
@@ -456,7 +437,6 @@ let settingsUnlocked = sessionStorage.getItem('karatsu-unlock') === '1';
 let editingId = null;
 let confirmDeleteId = null;
 let pendingDelete = null;
-let removeBy = '';
 let draftNotice = '';
 let lastJson = '';
 
@@ -600,20 +580,6 @@ function currentStaff() {
 function colorOf(id) {
   const index = state.staff.findIndex((s) => s.id === id);
   return COLORS[(index < 0 ? 0 : index) % COLORS.length];
-}
-
-function deletionsOn(date) {
-  return (state.deletions || []).filter((row) => row.date === date);
-}
-
-function goneText(row) {
-  if (row.name === row.by) return honorific(row.by) + 'が、自分の希望を削除しました。';
-  return honorific(row.name) + 'の希望を、' + honorific(row.by) + 'が削除しました。';
-}
-
-function goneShort(row) {
-  if (row.name === row.by) return row.by + 'が削除';
-  return row.name + 'を' + row.by + 'が削除';
 }
 
 function peopleOn(date) {
@@ -956,7 +922,6 @@ function calendarHtml() {
         '<span class="mid">' +
           (tags.length ? '<span class="tag">' + esc(tags.join('・')) + '</span>' : '') +
           names +
-          deletionsOn(date).map((row) => '<span class="cut">' + esc(goneShort(row)) + '</span>').join('') +
         '</span>' +
         '</div>';
     });
@@ -975,14 +940,9 @@ function peopleRows(date) {
   ).join('');
 }
 
-function goneRows(date) {
-  return deletionsOn(date).map((row) => '<p class="gone">' + esc(goneText(row)) + '</p>').join('');
-}
-
 function removeBox() {
   return '<form data-action="do-remove">' +
-    '<p class="who-line">' + esc(honorific(pendingDelete.name)) + 'の希望を削除します。</p>' +
-    '<label class="field">削除する人の名前<input id="remove-by" type="text" maxlength="16" autocomplete="off" value="' + esc(removeBy) + '"></label>' +
+    '<p class="confirm-q">' + esc(honorific(pendingDelete.name)) + 'の希望を、本当に削除していいですか？</p>' +
     '<div class="row"><button class="btn danger" type="submit"' + (saving ? ' disabled' : '') + '>削除する</button>' +
     '<button type="button" class="btn ghost" data-action="cancel-remove">やめる</button></div></form>';
 }
@@ -995,7 +955,6 @@ function detailHtml() {
   else if (h) note += '<p class="note">' + esc(h.full) + 'です。</p>';
   const confirming = pendingDelete && pendingDelete.date === date;
   let body = confirming ? removeBox() : peopleRows(date);
-  body += goneRows(date);
   if (isClosed(date)) {
     const due = deadlineDate(date);
     const [, m, d] = due.split('-').map(Number);
@@ -1187,7 +1146,6 @@ document.getElementById('app').addEventListener('click', async (event) => {
     sheet = null;
     peek = null;
     pendingDelete = null;
-    removeBy = '';
     render();
     return;
   }
@@ -1199,7 +1157,6 @@ document.getElementById('app').addEventListener('click', async (event) => {
     sheet = 'entry';
     peek = null;
     pendingDelete = null;
-    removeBy = '';
     render();
     const nameInput = document.getElementById('entry-name');
     if (nameInput) nameInput.focus();
@@ -1207,15 +1164,11 @@ document.getElementById('app').addEventListener('click', async (event) => {
   }
   if (action === 'ask-remove') {
     pendingDelete = { date: btn.dataset.date, id: btn.dataset.id, name: btn.dataset.name };
-    removeBy = '';
     render();
-    const input = document.getElementById('remove-by');
-    if (input) input.focus();
     return;
   }
   if (action === 'cancel-remove') {
     pendingDelete = null;
-    removeBy = '';
     render();
     return;
   }
@@ -1274,22 +1227,15 @@ document.getElementById('app').addEventListener('submit', async (event) => {
   const action = form.dataset.action;
   try {
     if (action === 'do-remove') {
-      const by = String(document.getElementById('remove-by').value || '').trim();
-      removeBy = by;
-      if (!by) {
-        showToast('削除する人の名前を入れてください。');
-        return;
-      }
       if (!pendingDelete || saving) return;
       const target = pendingDelete;
       saving = true;
       render();
       try {
-        state = await api('/api/remove', { id: target.id, date: target.date, by });
+        state = await api('/api/remove', { id: target.id, date: target.date });
         lastJson = JSON.stringify(state);
         pendingDelete = null;
-        removeBy = '';
-        showToast(goneText({ name: target.name, by }));
+        showToast(honorific(target.name) + 'の希望を削除しました');
       } catch (err) {
         showToast(err.message);
       } finally {

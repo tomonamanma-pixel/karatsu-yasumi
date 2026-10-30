@@ -271,20 +271,12 @@ async function handleApi(req, res) {
       }
 
       if (url === '/api/remove') {
-        const by = cleanName(body.by);
-        if (!by) return { error: '削除する人の名前を入れてください。', status: 400, write: false };
         if (!validDate(body.date)) return { error: '日付が正しくありません。', status: 400, write: false };
         const staff = current.staff.find((s) => s.id === body.id);
         const had = staff && current.requests.some((r) => r.staffId === staff.id && r.date === body.date);
         if (!had) return { error: 'その名前の希望はありません。', status: 400, write: false };
         current.requests = current.requests.filter((r) => !(r.staffId === staff.id && r.date === body.date));
-        current.deletions.push({
-          date: body.date,
-          name: staff.name,
-          by,
-          at: new Date().toISOString()
-        });
-        if (current.deletions.length > 100) current.deletions = current.deletions.slice(-100);
+        current.deletions = [];
         return { ok: true };
       }
 
