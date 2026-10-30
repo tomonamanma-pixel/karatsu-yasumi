@@ -289,6 +289,7 @@
   .person-row .nm { font-size: 24px; font-weight: 800; min-width: 0; }
   .person-row .btn { flex: none; min-width: 7em; }
   .confirm-q { margin: 8px 0 14px; font-size: 24px; font-weight: 800; line-height: 1.4; }
+  .confirm-q + .row .btn { min-width: 8em; }
   .roster-list { display: flex; flex-direction: column; gap: 10px; }
   .roster-row { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
   .roster-row:last-child { border-bottom: 0; padding-bottom: 0; }
@@ -936,14 +937,14 @@ function peopleRows(date) {
   return '<p class="who-line">入っている人</p>' + people.map((p) =>
     '<div class="person-row"><span class="nm">' + esc(honorific(p.name)) + '</span>' +
     '<button type="button" class="btn danger" data-action="ask-remove" data-date="' + date + '" data-id="' + esc(p.id) + '" data-name="' + esc(p.name) + '"' +
-    (saving ? ' disabled' : '') + '>削除</button></div>'
+    (saving ? ' disabled' : '') + '>削除する</button></div>'
   ).join('');
 }
 
 function removeBox() {
   return '<form data-action="do-remove">' +
-    '<p class="confirm-q">' + esc(honorific(pendingDelete.name)) + 'の希望を、本当に削除していいですか？</p>' +
-    '<div class="row"><button class="btn danger" type="submit"' + (saving ? ' disabled' : '') + '>削除する</button>' +
+    '<p class="confirm-q">' + esc(honorific(pendingDelete.name)) + 'の希望を、本当に削除しますか？</p>' +
+    '<div class="row"><button class="btn danger" type="submit"' + (saving ? ' disabled' : '') + '>OK</button>' +
     '<button type="button" class="btn ghost" data-action="cancel-remove">やめる</button></div></form>';
 }
 
