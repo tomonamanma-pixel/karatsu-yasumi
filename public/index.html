@@ -463,7 +463,7 @@ function inRange(y, m) {
   const now = new Date();
   const cur = monthId(now.getFullYear(), now.getMonth() + 1);
   const id = monthId(y, m);
-  return id >= cur - 1 && id <= cur + 3;
+  return id >= cur - 1;
 }
 
 function shiftMonth(delta) {
