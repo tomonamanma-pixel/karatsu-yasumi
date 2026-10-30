@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1f4d3a">
+<title>唐津店 お休み希望カレンダー</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #241f1a;
+    --muted: #5e564c;
+    --line: #e4dcd0;
+    --paper: #f4f0e8;
+    --card: #fffcf8;
+    --green: #1c4634;
+    --green-btn: #1f7a4d;
+    --danger: #9f1d1d;
+    --sun: #9f1d1d;
+    --sat: #1d4e89;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Yu Gothic UI", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    font-size: 20px;
+    line-height: 1.45;
+    color: var(--ink);
+    background: var(--paper);
+  }
+  button, input, textarea { font-family: inherit; color: inherit; }
+  button { touch-action: manipulation; cursor: pointer; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 3px solid #1d4e89;
+    outline-offset: 2px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 16px 40px; }
+  header.top { background: var(--green); color: white; padding: 14px 16px 16px; }
+  header.top .wrap { padding-bottom: 0; }
+  .shop { margin: 0; font-size: 16px; letter-spacing: 0.12em; opacity: 0.9; }
+  header.top h1 { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: 0.06em; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 14px;
+    box-shadow: 0 1px 0 rgba(36, 31, 26, 0.03);
+    container-type: inline-size;
+  }
+  h2 { font-size: 26px; margin: 0 0 10px; }
+  .lead { margin: 0 0 14px; color: var(--muted); }
+  .muted { color: var(--muted); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .grow { flex: 1; min-width: 160px; }
+  input[type="text"], input[type="password"], textarea {
+    width: 100%;
+    min-height: 64px;
+    font-size: 24px;
+    padding: 10px 14px;
+    border: 2px solid #c9bfb2;
+    border-radius: 14px;
+    background: white;
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  .btn {
+    min-height: 56px;
+    padding: 10px 16px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    font-size: 20px;
+    font-weight: 800;
+    background: white;
+    color: var(--ink);
+  }
+  .btn.block { width: 100%; }
+  .btn.main { background: var(--green-btn); color: white; min-height: 68px; font-size: 22px; }
+  .btn.danger { background: var(--danger); color: white; min-height: 68px; font-size: 22px; }
+  .btn.ghost { background: white; border-color: #d5cbbd; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .textbtn {
+    background: transparent;
+    border: 0;
+    color: var(--green);
+    font-size: 18px;
+    font-weight: 800;
+    min-height: 48px;
+    padding: 8px 4px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .names { display: flex; flex-direction: column; gap: 12px; }
+  .person {
+    min-height: 84px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    font-size: 28px;
+    font-weight: 800;
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 18px;
+    padding: 10px 16px;
+    box-shadow: 0 1px 0 rgba(36, 31, 26, 0.04);
+  }
+  .avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    flex: none;
+  }
+  .hero { padding-bottom: 8px; }
+  .whoami { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .kicker { margin: 0; color: var(--muted); font-size: 16px; font-weight: 700; }
+  .who-name { margin: 0; font-size: 32px; font-weight: 800; line-height: 1.2; }
+  .mine-dates { margin: 6px 0 0; font-size: 20px; }
+  .quiet { display: flex; gap: 16px; }
+  .strip {
+    margin: 14px 0 0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-weight: 800;
+  }
+  .strip.ok { background: #e7f6ee; }
+  .strip.warn { background: #fff6d8; }
+  .strip.bad { background: #fde8e6; }
+  .strip h2 { font-size: 22px; margin-bottom: 6px; }
+  .strip p { margin: 0; font-weight: 700; }
+  .linkrow {
+    width: 100%;
+    text-align: left;
+    background: white;
+    border: 1px solid #e7b2ad;
+    border-radius: 14px;
+    min-height: 60px;
+    padding: 10px 14px;
+    font-size: 18px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .monthbar { display: flex; align-items: center; gap: 6px; }
+  .monthbar h2 { flex: 1; text-align: center; font-size: 22px; margin: 0; }
+  .monthbar .btn { min-width: 0; min-height: 44px; padding: 6px 8px; font-size: 16px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 4px; font-size: 16px; color: var(--muted); font-weight: 700; }
+  .swatch { display: inline-block; width: 16px; height: 16px; border: 1px solid #c9bfb2; border-radius: 4px; vertical-align: -2px; margin-right: 4px; }
+  .notice { margin: 10px 0 0; color: var(--muted); font-size: 17px; }
+  .ask {
+    margin: 14px 0 4px;
+    padding: 0 12px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.5;
+    text-align: center;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+  .ask span { display: inline; }
+  .deadlines {
+    margin: 16px 0 0;
+    padding: 10px 12px 6px;
+    background: #f7f3ec;
+    border-radius: 14px;
+    text-align: left;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.35;
+    container-type: inline-size;
+  }
+  .deadlines .dead-title { margin: 0 0 6px; font-size: 1.06em; }
+  .dead-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.7em;
+    align-items: baseline;
+    padding: 0.4em 0.2em;
+    border-top: 1px solid #e4dcd0;
+  }
+  .dead-week, .dead-due { position: relative; z-index: 1; white-space: nowrap; }
+  .dead-row.past::after {
+    content: "";
+    position: absolute;
+    inset: 1px 0;
+    background: rgba(198, 40, 40, 0.28);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+  .week.dows, .week.days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+  }
+  .week.days { margin-top: 3px; }
+  .dow { text-align: center; font-weight: 800; font-size: 13px; }
+  .dow.sun, .num.sun { color: var(--sun); }
+  .dow.sat, .num.sat { color: var(--sat); }
+  .cell {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1px;
+    min-height: 52px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+    padding: 4px 2px 5px;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    container-type: inline-size;
+  }
+  .cell.pad { visibility: hidden; pointer-events: none; border-color: transparent; background: transparent; min-height: 0; }
+  .cell.lv1 { background: #fff8e4; }
+  .cell.lv2 { background: #fdeceb; }
+  .cell.mine { box-shadow: inset 0 3px 0 #1f7a4d; }
+  .cell.selected { outline: 2px solid #241f1a; outline-offset: 1px; }
+  .dateblock { display: flex; line-height: 1; }
+  .num { font-size: 16px; font-weight: 800; }
+  .wd { display: none; }
+  .mid { min-width: 0; }
+  .tag {
+    display: block;
+    max-width: 100%;
+    color: var(--muted);
+    font-size: min(10px, calc(100cqi / 3.3));
+    font-weight: 800;
+    line-height: 1.15;
+    overflow: hidden;
+  }
+  .who { display: flex; align-items: center; gap: 2px; margin-top: 1px; min-width: 0; max-width: 100%; }
+  .who .nm {
+    font-size: min(11px, calc(100cqi / 3.4));
+    font-weight: 800;
+    line-height: 1.15;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cmtbadge {
+    flex: none;
+    width: min(10px, calc(100cqi / 4));
+    height: min(10px, calc(100cqi / 4));
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #1d4e89;
+    cursor: pointer;
+  }
+  .dock {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(36, 31, 26, 0.08);
+    padding: 12px 14px;
+    margin-top: 14px;
+    max-height: 48vh;
+    overflow: auto;
+  }
+  .dock-inner { max-width: 920px; margin: 0 auto; }
+  .dock .date { margin: 0; font-size: 22px; font-weight: 800; }
+  .dock .note { margin: 4px 0 8px; font-size: 17px; }
+  .who-line { margin: 4px 0 8px; font-size: 18px; font-weight: 700; }
+  .roster-list { display: flex; flex-direction: column; gap: 10px; }
+  .roster-row { display: flex; gap: 10px; align-items: flex-start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .roster-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .roster-name { min-width: 7em; font-weight: 800; }
+  .staff-row { border: 1px solid var(--line); border-radius: 16px; padding: 12px; margin: 10px 0; background: white; }
+  .staff-row .nm { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  .help { font-size: 17px; color: var(--muted); }
+  .mask {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(36, 31, 26, 0.45);
+    cursor: pointer;
+  }
+  .sheet {
+    position: relative;
+    z-index: 1;
+    width: min(560px, 100%);
+    max-height: 92vh;
+    overflow: auto;
+    background: white;
+    border-radius: 22px 22px 0 0;
+    padding: 18px 16px 24px;
+    box-shadow: 0 -8px 30px rgba(36, 31, 26, 0.18);
+  }
+  .sheet .date { margin: 0 0 8px; font-size: 26px; font-weight: 800; }
+  .comment-body {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  #toast {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 80;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .cmt { display: block; font-size: 15px; font-weight: 700; color: var(--muted); }
+  .field { display: block; margin: 8px 0; font-size: 16px; font-weight: 800; color: var(--muted); }
+  .namepicks { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .chipbtn {
+    min-height: 48px;
+    border-radius: 999px;
+    border: 2px solid #d5cbbd;
+    background: white;
+    font-size: 18px;
+    font-weight: 800;
+    padding: 6px 14px;
+  }
+  .chipbtn.on { background: var(--green-btn); color: white; border-color: var(--green-btn); }
+  .hot { color: var(--danger); font-weight: 800; }
+  body.has-dock { padding-bottom: 40px; }
+  body.has-dock #toast { bottom: 16px; }
+  #toast .inner {
+    pointer-events: auto;
+    background: #241f1a;
+    color: white;
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  }
+  #toast button { min-height: 48px; background: white; color: #241f1a; border: 0; border-radius: 12px; font-weight: 800; font-size: 18px; padding: 8px 12px; }
+  details.urls summary { font-size: 18px; font-weight: 800; cursor: pointer; min-height: 44px; }
+  .url { font-size: 20px; font-weight: 800; word-break: break-all; margin: 8px 0 0; }
+  @media (max-width: 859px) {
+    header.top { padding: 8px 10px 10px; }
+    header.top h1 { font-size: 26px; }
+    .wrap { padding-left: 8px; padding-right: 8px; }
+    .card { padding: 10px 6px; margin-top: 8px; }
+    .ask { font-size: min(15px, calc((100cqi - 36px) / 16)); }
+    .ask span { display: block; white-space: nowrap; }
+    .dead-row { font-size: min(17px, calc((100cqi - 8px) / 15)); }
+  }
+  @media (min-width: 860px) {
+    .monthbar h2 { font-size: 30px; }
+    .monthbar .btn { min-width: 96px; min-height: 56px; padding: 10px 16px; font-size: 20px; }
+    .week.dows, .week.days { gap: 8px; }
+    .dow { font-size: 16px; }
+    .cell { min-height: 108px; padding: 8px; border-radius: 14px; gap: 2px; }
+    .num { font-size: 26px; }
+    .tag { font-size: 13px; }
+    .who { gap: 4px; margin-top: 2px; }
+    .who .nm { font-size: 16px; white-space: normal; }
+    .cmtbadge { width: 16px; height: 16px; }
+    .mask { align-items: center; }
+    .sheet { border-radius: 22px; margin: 16px; }
+  }
+  @media print {
+    header.top { background: white; color: black; }
+    .no-print, #toast, .mask { display: none !important; }
+    .card { break-inside: avoid; }
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="shop">唐津店</p>
+    <h1>お休み希望カレンダー</h1>
+  </div>
+</header>
+<main class="wrap" id="app">
+  <p class="card">読み込んでいます…</p>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+const COLORS = ['#9f1d1d', '#1d4e89', '#1f7a4d', '#b45309', '#6d28d9', '#0f766e', '#9a3412', '#be185d'];
+
+let state = null;
+let info = { urls: [], local: '' };
+let screen = 'cal';
+let draftName = '';
+let draftComment = '';
+let entryBlank = false;
+let view = defaultView();
+let selected = null;
+let sheet = null;
+let peek = null;
+let confirmDate = null;
+let saving = false;
+let toastTimer = null;
+let settingsUnlocked = sessionStorage.getItem('karatsu-unlock') === '1';
+let editingId = null;
+let confirmDeleteId = null;
+let draftNotice = '';
+let lastJson = '';
+
+function defaultView() {
+  const n = new Date();
+  const d = new Date(n.getFullYear(), n.getMonth() + (n.getDate() >= 15 ? 1 : 0), 1);
+  return { y: d.getFullYear(), m: d.getMonth() + 1 };
+}
+
+function ymd(d) {
+  const z = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+}
+
+function monthKey(v) {
+  v = v || view;
+  return v.y + '-' + String(v.m).padStart(2, '0');
+}
+
+function monthId(y, m) { return y * 12 + (m - 1); }
+
+function inRange(y, m) {
+  const now = new Date();
+  const cur = monthId(now.getFullYear(), now.getMonth() + 1);
+  const id = monthId(y, m);
+  return id >= cur - 1 && id <= cur + 3;
+}
+
+function shiftMonth(delta) {
+  const d = new Date(view.y, view.m - 1 + delta, 1);
+  const next = { y: d.getFullYear(), m: d.getMonth() + 1 };
+  if (!inRange(next.y, next.m)) return;
+  view = next;
+  selected = null;
+  confirmDate = null;
+  ensureSelected();
+  render();
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function honorific(name) {
+  return /さん$/.test(name) ? name : name + 'さん';
+}
+
+function nthMonday(year, month, n) {
+  const first = new Date(year, month - 1, 1);
+  const day = 1 + ((1 - first.getDay() + 7) % 7) + (n - 1) * 7;
+  return day;
+}
+
+function equinox(year, kind) {
+  const known = { 2026: { s: 20, a: 23 }, 2027: { s: 21, a: 23 } };
+  if (known[year]) return kind === 's' ? known[year].s : known[year].a;
+  const y = year - 1980;
+  if (kind === 's') return Math.floor(20.8431 + 0.242194 * y - Math.floor(y / 4));
+  return Math.floor(23.2488 + 0.242194 * y - Math.floor(y / 4));
+}
+
+const holidayCache = {};
+function holidays(year) {
+  if (holidayCache[year]) return holidayCache[year];
+  const items = [];
+  const set = new Set();
+  function add(m, d, full, short) {
+    const key = ymd(new Date(year, m - 1, d));
+    if (set.has(key)) return;
+    set.add(key);
+    items.push({ key, full, short });
+  }
+  [
+    [1, 1, '元日', '元日'],
+    [2, 11, '建国記念の日', '建国'],
+    [2, 23, '天皇誕生日', '天皇'],
+    [4, 29, '昭和の日', '昭和'],
+    [5, 3, '憲法記念日', '憲法'],
+    [5, 4, 'みどりの日', 'みどり'],
+    [5, 5, 'こどもの日', 'こども'],
+    [8, 11, '山の日', '山の日'],
+    [11, 3, '文化の日', '文化'],
+    [11, 23, '勤労感謝の日', '勤労']
+  ].forEach((row) => add(row[0], row[1], row[2], row[3]));
+  add(1, nthMonday(year, 1, 2), '成人の日', '成人');
+  add(7, nthMonday(year, 7, 3), '海の日', '海の日');
+  add(9, nthMonday(year, 9, 3), '敬老の日', '敬老');
+  add(10, nthMonday(year, 10, 2), 'スポーツの日', 'スポーツ');
+  add(3, equinox(year, 's'), '春分の日', '春分');
+  add(9, equinox(year, 'a'), '秋分の日', '秋分');
+
+  items.slice().forEach((item) => {
+    const [ys, ms, ds] = item.key.split('-').map(Number);
+    const dt = new Date(ys, ms - 1, ds);
+    if (dt.getDay() !== 0) return;
+    const n = new Date(dt);
+    while (true) {
+      n.setDate(n.getDate() + 1);
+      const key = ymd(n);
+      if (!set.has(key)) {
+        add(n.getMonth() + 1, n.getDate(), '振替休日', '振替');
+        break;
+      }
+    }
+  });
+
+  for (let m = 1; m <= 12; m += 1) {
+    const last = new Date(year, m, 0).getDate();
+    for (let d = 1; d <= last; d += 1) {
+      const dt = new Date(year, m - 1, d);
+      if (dt.getDay() === 0) continue;
+      const key = ymd(dt);
+      if (set.has(key)) continue;
+      const prev = new Date(year, m - 1, d - 1);
+      const next = new Date(year, m - 1, d + 1);
+      if (set.has(ymd(prev)) && set.has(ymd(next))) add(m, d, '休日', '休日');
+    }
+  }
+  const map = {};
+  items.forEach((item) => { map[item.key] = item; });
+  holidayCache[year] = map;
+  return map;
+}
+
+function holidayOf(date) {
+  const year = Number(date.slice(0, 4));
+  return holidays(year)[date] || null;
+}
+
+function isKunchi(date) {
+  return /-11-0[234]$/.test(date);
+}
+
+function currentStaff() {
+  if (!state || !draftName) return null;
+  return state.staff.find((s) => s.name === draftName) || null;
+}
+
+function colorOf(id) {
+  const index = state.staff.findIndex((s) => s.id === id);
+  return COLORS[(index < 0 ? 0 : index) % COLORS.length];
+}
+
+function peopleOn(date) {
+  const comments = {};
+  state.requests.forEach((r) => {
+    if (r.date === date) comments[r.staffId] = r.comment || '';
+  });
+  return state.staff
+    .filter((s) => Object.prototype.hasOwnProperty.call(comments, s.id))
+    .map((s) => ({ id: s.id, name: s.name, comment: comments[s.id] }));
+}
+
+function commentFor(name, date) {
+  const person = state.staff.find((s) => s.name === name);
+  if (!person || !date) return '';
+  const found = state.requests.find((r) => r.staffId === person.id && r.date === date);
+  return found ? (found.comment || '') : '';
+}
+
+function datesFor(id, key) {
+  key = key || monthKey();
+  return state.requests
+    .filter((r) => r.staffId === id && r.date.startsWith(key))
+    .map((r) => r.date)
+    .sort();
+}
+
+function isSubmitted(id, key) {
+  key = key || monthKey();
+  if (datesFor(id, key).length) return true;
+  return state.submissions.some((s) => s.staffId === id && s.month === key);
+}
+
+function ensureSelected() {
+  const key = monthKey();
+  if (selected && selected.startsWith(key)) return;
+  const today = ymd(new Date());
+  selected = today.startsWith(key) ? today : key + '-01';
+}
+
+function dayLabel(date) {
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const h = holidayOf(date);
+  let text = m + '月' + d + '日（' + WEEK[dt.getDay()] + '）';
+  if (h) text += ' ' + h.full;
+  if (isKunchi(date)) text += ' 唐津くんち';
+  return text;
+}
+
+function deadlineDate(date) {
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  const saturday = new Date(dt);
+  saturday.setDate(dt.getDate() + (6 - dt.getDay()));
+  const deadline = new Date(saturday);
+  deadline.setDate(saturday.getDate() - 21);
+  return ymd(deadline);
+}
+
+function isClosed(date) {
+  return deadlineDate(date) < ymd(new Date());
+}
+
+function weekDeadlines() {
+  const first = new Date(view.y, view.m - 1, 1);
+  const start = new Date(first);
+  start.setDate(1 - first.getDay());
+  const today = ymd(new Date());
+  const rows = [];
+  for (let w = 0; w < 6; w += 1) {
+    const sunday = new Date(start);
+    sunday.setDate(start.getDate() + w * 7);
+    const days = [];
+    for (let i = 0; i < 7; i += 1) {
+      const cur = new Date(sunday);
+      cur.setDate(sunday.getDate() + i);
+      if (cur.getMonth() === view.m - 1) days.push(cur);
+    }
+    if (!days.length) continue;
+    const saturday = new Date(sunday);
+    saturday.setDate(sunday.getDate() + 6);
+    const deadline = new Date(saturday);
+    deadline.setDate(saturday.getDate() - 21);
+    const from = days[0].getDate();
+    const to = days[days.length - 1].getDate();
+    const range = from === to ? from + '日' : from + '日～' + to + '日';
+    const due = (deadline.getMonth() + 1) + '月' + deadline.getDate() + '日（土）';
+    const dueYmd = ymd(deadline);
+    rows.push({ range, due, past: dueYmd < today, todayDue: dueYmd === today });
+  }
+  return rows;
+}
+
+function deadlineHtml() {
+  const lines = weekDeadlines().map((row) => {
+    const due = row.due + 'まで' + (row.todayDue ? '（今日まで）' : '');
+    return '<div class="dead-row' + (row.past ? ' past' : '') + '">' +
+      '<span class="dead-week">' + row.range + '</span>' +
+      '<span class="dead-due">' + due + '</span>' +
+      '</div>';
+  }).join('');
+  return '<div class="deadlines"><p class="dead-title">締め切り</p>' + lines + '</div>';
+}
+
+const remote = (window.KARATSU && window.KARATSU.url && window.KARATSU.key)
+  ? window.supabase.createClient(window.KARATSU.url, window.KARATSU.key)
+  : null;
+
+async function api(path, body) {
+  if (remote) {
+    const action = String(path || '').replace(/^\/api\//, '');
+    const { data, error } = await remote.rpc('app_api', { action, payload: body || {} });
+    if (error) throw new Error('保存できませんでした。もう一度押してください。');
+    if (data && data.error) throw new Error(data.error);
+    return data;
+  }
+  const res = await fetch(path, {
+    method: body ? 'POST' : 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || '保存できませんでした。');
+  return data;
+}
+
+function showToast(message, undo) {
+  const el = document.getElementById('toast');
+  el.innerHTML = '<div class="inner"><span>' + esc(message) + '</span>' +
+    (undo ? '<button type="button" id="undo-btn">元に戻す</button>' : '') + '</div>';
+  if (undo) document.getElementById('undo-btn').onclick = undo;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.innerHTML = ''; }, 8000);
+}
+
+function go(next) {
+  screen = next;
+  if (next === 'settings') {
+    editingId = null;
+    confirmDeleteId = null;
+    draftNotice = state ? state.settings.notice : '';
+  }
+  history.pushState({ screen }, '', '#' + next);
+  render();
+}
+
+function render() {
+  const noticeEl = document.getElementById('notice');
+  if (noticeEl) draftNotice = noticeEl.value;
+  const nameEl = document.getElementById('entry-name');
+  const commentEl = document.getElementById('entry-comment');
+  if (!entryBlank) {
+    if (nameEl) draftName = nameEl.value;
+    if (commentEl) draftComment = commentEl.value;
+  }
+  entryBlank = false;
+  const app = document.getElementById('app');
+  const active = document.activeElement;
+  const typing = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') && active.id;
+  const typed = typing ? { id: active.id, value: active.value, pos: active.selectionStart } : null;
+  const urlsOpen = document.querySelector('details.urls') && document.querySelector('details.urls').open;
+  const scrollY = window.scrollY;
+  if (screen === 'cal') ensureSelected();
+  document.body.classList.toggle('has-dock', false);
+  app.innerHTML = screen === 'settings' ? renderSettings() : screen === 'cal' ? renderCal() : renderPick();
+  if (urlsOpen) {
+    const details = document.querySelector('details.urls');
+    if (details) details.open = true;
+  }
+  if (typed) {
+    const el = document.getElementById(typed.id);
+    if (el) {
+      el.value = typed.value;
+      el.focus();
+      if (el.setSelectionRange && typed.pos != null) el.setSelectionRange(typed.pos, typed.pos);
+    }
+  }
+  window.scrollTo(0, scrollY);
+  fitAsk();
+}
+
+function fitAsk() {
+  const ask = document.querySelector('.ask');
+  if (!ask) return;
+  const spans = [...ask.querySelectorAll('span')];
+  if (!spans.length) return;
+  let size = parseFloat(getComputedStyle(ask).fontSize);
+  let guard = 0;
+  while (guard < 30 && size > 11 && (ask.scrollWidth > ask.clientWidth + 1 || spans.some((span) => span.scrollWidth > span.clientWidth + 1))) {
+    size -= 0.5;
+    ask.style.fontSize = size + 'px';
+    guard += 1;
+  }
+}
+
+function renderPick() {
+  const staff = state.staff;
+  const buttons = staff.map((s) =>
+    '<button type="button" class="person" data-action="choose" data-id="' + esc(s.id) + '">' +
+    '<i class="avatar" style="background:' + colorOf(s.id) + '">' + esc(s.name.slice(0, 1)) + '</i>' +
+    '<span>' + esc(honorific(s.name)) + '</span></button>'
+  ).join('');
+  const setup = staff.length
+    ? '<section class="card"><h2>あなたの名前を押してください</h2><p class="lead">カレンダーが開きます。ほかの人の希望も、同じ画面に出ます。</p><div class="names">' + buttons + '</div></section>'
+    : '';
+  const addForm = staff.length === 0 ? (
+    '<form class="card" data-action="add-staff">' +
+      '<h2>はじめに、名前を登録します</h2>' +
+      '<p class="lead">ここで働く人を、一人ずつ追加してください。姓だけでも大丈夫です。</p>' +
+      '<div class="row"><input class="grow" id="new-name" name="name" type="text" maxlength="16" autocomplete="off" placeholder="山田" enterkeyhint="done">' +
+      '<button class="btn main" type="submit">追加する</button></div>' +
+      '<p class="help">同じ姓の人がいるときは、下の名前も入れてください。</p>' +
+    '</form>'
+  ) : '';
+  return setup + addForm +
+    '<p class="no-print" style="text-align:center"><button type="button" class="textbtn" data-action="settings">名前の追加・削除</button></p>';
+}
+
+function renderUrls() {
+  const list = info.urls.length ? info.urls : [];
+  const lines = list.map((url) => '<p class="url">' + esc(url) + '</p>').join('');
+  return '<details class="card urls no-print"><summary>店長さんへ：スマホから開く住所</summary>' +
+    '<p class="help">店のパソコンと、同じワイファイのスマホで、この住所を開いてください。LINEで送っても大丈夫です。</p>' +
+    (lines || '<p class="muted">住所が取れませんでした。このパソコンでは http://localhost:8787 を開いています。</p>') +
+    '<p class="help">黒い画面は閉じないでください。パソコンの電源が切れると、スマホからも開けなくなります。</p>' +
+    '</details>';
+}
+
+function renderCal() {
+  return (
+    '<section class="card calcard">' +
+      '<div class="monthbar no-print">' +
+        '<button type="button" class="btn ghost" data-action="prev"' + (monthBackOk() ? '' : ' disabled') + '>前の月</button>' +
+        '<h2>' + view.y + '年' + view.m + '月</h2>' +
+        '<button type="button" class="btn ghost" data-action="next"' + (monthForwardOk() ? '' : ' disabled') + '>次の月</button>' +
+      '</div>' +
+      calendarHtml() +
+      '<p class="ask"><span>同じ時間帯でお休みが</span><span>重ならないようにお願いします。</span></p>' +
+      deadlineHtml() +
+    '</section>' +
+    (sheet === 'entry' ? detailHtml() : '') +
+    (sheet === 'comment' ? commentHtml() : '')
+  );
+}
+
+function monthBackOk() {
+  const d = new Date(view.y, view.m - 2, 1);
+  return inRange(d.getFullYear(), d.getMonth() + 1);
+}
+function monthForwardOk() {
+  const d = new Date(view.y, view.m, 1);
+  return inRange(d.getFullYear(), d.getMonth() + 1);
+}
+
+function noneButton(me, mine, key) {
+  if (mine.length) return '';
+  if (isSubmitted(me.id, key)) {
+    return '<div class="no-print" style="margin-top:8px">この月は「休み希望なし」で出しています。<br>' +
+      '<button type="button" class="btn ghost" data-action="clear-none">取り消して、日にちを選び直す</button></div>';
+  }
+  return '<div class="no-print" style="margin-top:8px"><button type="button" class="btn ghost" data-action="mark-none">この月は休み希望がありません</button></div>';
+}
+
+function overlapDays() {
+  const key = monthKey();
+  const map = {};
+  state.requests.forEach((r) => {
+    if (!r.date.startsWith(key)) return;
+    if (!map[r.date]) map[r.date] = [];
+    const person = state.staff.find((s) => s.id === r.staffId);
+    if (person) map[r.date].push(person);
+  });
+  return Object.keys(map).filter((date) => map[date].length >= (state.settings.warnAt || 2)).sort()
+    .map((date) => ({ date, people: map[date] }));
+}
+
+function overlapBox(list) {
+  if (!list.length) return '<p class="strip ok">重なっている日はありません</p>';
+  const items = list.map((item) =>
+    '<button type="button" class="linkrow" data-action="select" data-date="' + item.date + '">' +
+    esc(dayLabel(item.date)) + '　' + esc(item.people.map((p) => honorific(p.name)).join('、')) +
+    '</button>'
+  ).join('');
+  return '<section class="strip bad"><h2>重なっている日　' + list.length + '日</h2>' +
+    '<p>できるなら、別の日にしてください。</p>' + items + '</section>';
+}
+
+function missingBox(missing) {
+  if (!state.staff.length) return '';
+  if (!missing.length) return '<p class="strip ok">全員、希望を出しています</p>';
+  return '<p class="strip warn">まだの人：' + esc(missing.map((s) => honorific(s.name)).join('、')) + '</p>';
+}
+
+function calendarHtml() {
+  const first = new Date(view.y, view.m - 1, 1);
+  const start = new Date(first);
+  start.setDate(1 - first.getDay());
+  let html = '<div class="calgrid"><div class="week dows">' + WEEK.map((w, i) =>
+    '<div class="dow ' + (i === 0 ? 'sun' : i === 6 ? 'sat' : '') + '">' + w + '</div>'
+  ).join('') + '</div>';
+  for (let w = 0; w < 6; w += 1) {
+    const days = [];
+    let inMonth = false;
+    for (let i = 0; i < 7; i += 1) {
+      const cur = new Date(start);
+      cur.setDate(start.getDate() + w * 7 + i);
+      if (cur.getMonth() === view.m - 1) inMonth = true;
+      days.push(cur);
+    }
+    if (!inMonth) continue;
+    html += '<div class="week days">';
+    days.forEach((cur) => {
+      if (cur.getMonth() !== view.m - 1) {
+        html += '<div class="cell pad"></div>';
+        return;
+      }
+      const date = ymd(cur);
+      const people = peopleOn(date);
+      const mine = people.some((p) => p.name === draftName);
+      const warnAt = state.settings.warnAt || 2;
+      const level = people.length >= warnAt ? 'lv2' : people.length >= 1 ? 'lv1' : '';
+      const dow = cur.getDay();
+      const h = holidayOf(date);
+      const tags = [];
+      if (h) tags.push(h.short);
+      if (isKunchi(date)) tags.push('くんち');
+      const names = people.map((p) =>
+        '<span class="who"><span class="nm">' + esc(p.name) + '</span>' +
+        (p.comment
+          ? '<button type="button" class="cmtbadge" data-action="show-comment" data-date="' + date + '" data-id="' + esc(p.id) + '" aria-label="' + esc(p.name) + 'さんのコメント"></button>'
+          : '') +
+        '</span>'
+      ).join('');
+      const tone = dow === 0 ? 'sun' : dow === 6 ? 'sat' : '';
+      html += '<div class="cell ' + level + (mine ? ' mine' : '') + (date === selected && sheet === 'entry' ? ' selected' : '') +
+        '" data-action="select" data-date="' + date + '" role="button" tabindex="0">' +
+        '<span class="dateblock"><span class="num ' + tone + '">' + cur.getDate() +
+        '</span><span class="wd ' + tone + '">' + WEEK[dow] + '</span></span>' +
+        '<span class="mid">' +
+          (tags.length ? '<span class="tag">' + esc(tags.join('・')) + '</span>' : '') +
+          names +
+        '</span>' +
+        '</div>';
+    });
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+
+function detailHtml() {
+  const date = selected;
+  const people = peopleOn(date);
+  const mine = people.find((p) => p.name === draftName);
+  const h = holidayOf(date);
+  let note = '';
+  if (isKunchi(date)) note += '<p class="note"><strong>唐津くんちの期間です。</strong>お店が忙しくなります。</p>';
+  else if (h) note += '<p class="note">' + esc(h.full) + 'です。</p>';
+  if (isClosed(date)) {
+    const due = deadlineDate(date);
+    const [, m, d] = due.split('-').map(Number);
+    return '<div class="mask">' +
+      '<button type="button" class="backdrop" data-action="close-sheet" aria-label="閉じる"></button>' +
+      '<div class="sheet">' +
+      '<p class="date">' + esc(dayLabel(date)) + '</p>' + note +
+      '<p class="note">締め切りの' + m + '月' + d + '日（土）を過ぎているので、入力できません。</p>' +
+      '<button type="button" class="btn ghost block" data-action="close-sheet">閉じる</button>' +
+      '</div></div>';
+  }
+  const label = mine ? '内容を保存する' : 'この日を休み希望にする';
+  return '<div class="mask">' +
+    '<button type="button" class="backdrop" data-action="close-sheet" aria-label="閉じる"></button>' +
+    '<form class="sheet" id="detail" data-action="save-entry">' +
+    '<p class="date">' + esc(dayLabel(date)) + '</p>' + note +
+    '<label class="field">名前<input id="entry-name" type="text" maxlength="16" autocomplete="off" value="' + esc(draftName) + '"></label>' +
+    '<label class="field">コメント（例）●時から●時まではOKですなど・・・<input id="entry-comment" type="text" maxlength="80" autocomplete="off" value="' + esc(draftComment) + '"></label>' +
+    '<div class="row"><button class="btn main grow" type="submit"' + (saving ? ' disabled' : '') + '>' + label + '</button>' +
+    (mine ? '<button type="button" class="btn danger" data-action="remove-entry"' + (saving ? ' disabled' : '') + '>取り消す</button>' : '') +
+    '</div>' +
+    '<button type="button" class="btn ghost block" data-action="close-sheet">閉じる</button>' +
+    '</form></div>';
+}
+
+function commentHtml() {
+  if (!peek) return '';
+  return '<div class="mask">' +
+    '<button type="button" class="backdrop" data-action="close-sheet" aria-label="閉じる"></button>' +
+    '<div class="sheet">' +
+      '<p class="date">' + esc(honorific(peek.name)) + '</p>' +
+      '<p class="note">' + esc(dayLabel(peek.date)) + '</p>' +
+      '<p class="comment-body">' + esc(peek.comment) + '</p>' +
+      '<button type="button" class="btn ghost block" data-action="close-sheet">閉じる</button>' +
+    '</div></div>';
+}
+
+function rosterHtml(key) {
+  const hot = new Set();
+  state.requests.forEach((r) => {
+    if (!r.date.startsWith(key)) return;
+    hot.add(r.date);
+  });
+  const counts = {};
+  hot.forEach((date) => { counts[date] = state.requests.filter((r) => r.date === date).length; });
+  const crowded = new Set(Object.keys(counts).filter((date) => counts[date] >= (state.settings.warnAt || 2)));
+  return '<section class="card"><h2>みんなの希望</h2><div class="roster-list">' +
+    state.staff.map((s) => {
+      const dates = datesFor(s.id, key);
+      let body;
+      if (dates.length) {
+        body = dates.map((date) => {
+          const req = state.requests.find((r) => r.staffId === s.id && r.date === date);
+          const label = shortDay(date) + (req && req.comment ? '（' + esc(req.comment) + '）' : '');
+          return crowded.has(date) ? '<span class="hot">' + label + '</span>' : label;
+        }).join('、');
+      } else if (isSubmitted(s.id, key)) {
+        body = '希望なし';
+      } else {
+        body = '<span class="muted">まだ</span>';
+      }
+      return '<div class="roster-row"><div class="roster-name" style="border-left:8px solid ' + colorOf(s.id) + ';padding-left:8px">' +
+        esc(honorific(s.name)) + '</div><div>' + body + '</div></div>';
+    }).join('') +
+    '</div><p class="help">赤い日付は、休みが重なっています。</p></section>';
+}
+
+function renderSettings() {
+  if (state.settings.codeSet && !settingsUnlocked) {
+    return '<section class="card"><h2>合言葉</h2>' +
+      '<p>名前の追加や削除には、店の合言葉が要ります。</p>' +
+      '<form data-action="unlock"><input id="code" type="password" autocomplete="off" placeholder="合言葉">' +
+      '<div class="row" style="margin-top:10px"><button class="btn main" type="submit">開く</button>' +
+      '<button class="btn ghost" type="button" data-action="back">戻る</button></div></form></section>';
+  }
+  const rows = state.staff.map((s, index) => {
+    if (editingId === s.id) {
+      return '<div class="staff-row"><form data-action="rename" data-id="' + esc(s.id) + '">' +
+        '<input id="edit-name" type="text" maxlength="16" value="' + esc(s.name) + '">' +
+        '<div class="row" style="margin-top:8px"><button class="btn main" type="submit">保存する</button>' +
+        '<button class="btn ghost" type="button" data-action="cancel-edit">やめる</button></div></form></div>';
+    }
+    const deleting = confirmDeleteId === s.id;
+    return '<div class="staff-row"><div class="nm" style="border-left:8px solid ' + colorOf(s.id) + ';padding-left:8px">' +
+      esc(honorific(s.name)) + '</div>' +
+      (deleting
+        ? '<p>この人の休み希望も消えます。</p><div class="row"><button type="button" class="btn danger" data-action="remove-staff" data-id="' + esc(s.id) + '">削除する</button><button type="button" class="btn ghost" data-action="cancel-delete">やめる</button></div>'
+        : '<div class="row"><button type="button" class="btn ghost" data-action="up" data-id="' + esc(s.id) + '"' + (index === 0 ? ' disabled' : '') + '>上へ</button>' +
+          '<button type="button" class="btn ghost" data-action="down" data-id="' + esc(s.id) + '"' + (index === state.staff.length - 1 ? ' disabled' : '') + '>下へ</button>' +
+          '<button type="button" class="btn ghost" data-action="edit" data-id="' + esc(s.id) + '">名前を直す</button>' +
+          '<button type="button" class="btn ghost" data-action="ask-delete" data-id="' + esc(s.id) + '">削除</button></div>') +
+      '</div>';
+  }).join('');
+  return '<section class="card"><h2>名前</h2>' +
+    '<form data-action="add-staff"><div class="row"><input class="grow" id="new-name" type="text" maxlength="16" autocomplete="off" placeholder="山田">' +
+    '<button class="btn main" type="submit">追加する</button></div></form>' +
+    rows +
+    '<p style="margin-top:16px"><button type="button" class="btn ghost" data-action="back">戻る</button></p></section>' +
+    '<section class="card"><h2>赤くする人数</h2>' +
+    '<p>同じ日に <strong id="warn-num">' + state.settings.warnAt + '人</strong> 以上で、その日を赤くします。</p>' +
+    '<div class="row"><button type="button" class="btn ghost" data-action="warn" data-dir="-1">減らす</button>' +
+    '<button type="button" class="btn ghost" data-action="warn" data-dir="1">増やす</button></div></section>' +
+    '<section class="card"><h2>案内文</h2><form data-action="save-notice">' +
+    '<textarea id="notice" maxlength="120">' + esc(draftNotice) + '</textarea>' +
+    '<p><button class="btn main" type="submit">案内を保存</button></p></form></section>' +
+    '<section class="card"><h2>合言葉</h2>' +
+    '<p class="help">名前の削除や、この設定の変更に使います。休み希望を入れるとき、合言葉は要りません。空のままなら、合言葉なしです。</p>' +
+    '<form data-action="save-code"><input id="new-code" type="text" maxlength="20" autocomplete="off" placeholder="新しい合言葉">' +
+    (state.settings.codeSet ? '<p class="help">今の合言葉も入れてください。</p><input id="old-code" type="password" autocomplete="off" placeholder="今の合言葉">' : '') +
+    '<div class="row" style="margin-top:10px"><button class="btn main" type="submit">合言葉を保存</button>' +
+    (state.settings.codeSet ? '<button class="btn ghost" type="button" data-action="clear-code">合言葉をやめる</button>' : '') +
+    '</div></form></section>';
+}
+
+async function refresh() {
+  try {
+    const next = await api('/api/state');
+    const json = JSON.stringify(next);
+    state = next;
+    if (json === lastJson) return;
+    lastJson = json;
+    if (draftName && !state.staff.some((s) => s.name === draftName)) {
+      draftName = '';
+      draftComment = '';
+      localStorage.removeItem('karatsu-name');
+    }
+    if (screen !== 'settings') render();
+  } catch (err) {
+    document.getElementById('app').innerHTML =
+      '<section class="card"><h2>画面が開いていません</h2>' +
+      '<p>「ダブルクリックで開く」を開いて、黒い画面を閉じずに、このページを開き直してください。</p>' +
+      '<button type="button" class="btn main" onclick="location.reload()">開き直す</button></section>';
+  }
+}
+
+async function saveRequest(on) {
+  const me = currentStaff();
+  const date = selected;
+  if (!me || !date || saving) return;
+  saving = true;
+  render();
+  try {
+    state = await api('/api/request', { staffId: me.id, date, on });
+    lastJson = JSON.stringify(state);
+    confirmDate = null;
+    const [, m, d] = date.split('-');
+    showToast(Number(m) + '月' + Number(d) + '日を' + (on ? '休み希望にしました' : '取り消しました'), async () => {
+      document.getElementById('toast').innerHTML = '';
+      await saveRequest(!on);
+    });
+    if (navigator.vibrate) navigator.vibrate(12);
+  } catch (err) {
+    showToast(err.message || '保存できませんでした。');
+  } finally {
+    saving = false;
+    render();
+  }
+}
+
+document.getElementById('app').addEventListener('click', async (event) => {
+  const btn = event.target.closest('[data-action]');
+  if (!btn || btn.disabled) return;
+  const action = btn.dataset.action;
+  if (action === 'settings') { go('settings'); return; }
+  if (action === 'back') {
+    screen = 'cal';
+    history.pushState({ screen }, '', '#cal');
+    render();
+    return;
+  }
+  if (action === 'print') { window.print(); return; }
+  if (action === 'prev') { shiftMonth(-1); return; }
+  if (action === 'next') { shiftMonth(1); return; }
+  if (action === 'pick-name') {
+    draftName = btn.dataset.name;
+    draftComment = '';
+    entryBlank = true;
+    render();
+    const nameInput = document.getElementById('entry-name');
+    if (nameInput) nameInput.focus();
+    return;
+  }
+  if (action === 'show-comment') {
+    const person = peopleOn(btn.dataset.date).find((p) => p.id === btn.dataset.id);
+    if (!person || !person.comment) return;
+    peek = { name: person.name, comment: person.comment, date: btn.dataset.date };
+    sheet = 'comment';
+    render();
+    return;
+  }
+  if (action === 'close-sheet') {
+    sheet = null;
+    peek = null;
+    render();
+    return;
+  }
+  if (action === 'select') {
+    selected = btn.dataset.date;
+    draftName = '';
+    draftComment = '';
+    entryBlank = true;
+    sheet = 'entry';
+    peek = null;
+    render();
+    const nameInput = document.getElementById('entry-name');
+    if (nameInput) nameInput.focus();
+    return;
+  }
+  if (action === 'remove-entry') {
+    if (isClosed(selected)) {
+      showToast('この週は締め切りを過ぎているので、入れられません。');
+      return;
+    }
+    const nameEl = document.getElementById('entry-name');
+    const name = nameEl ? nameEl.value : draftName;
+    if (saving) return;
+    saving = true;
+    render();
+    try {
+      state = await api('/api/entry', { name, date: selected, on: false });
+      lastJson = JSON.stringify(state);
+      draftName = String(name || '').trim();
+      draftComment = '';
+      localStorage.setItem('karatsu-name', draftName);
+      sheet = null;
+      showToast('希望を取り消しました');
+    } catch (err) {
+      showToast(err.message);
+    } finally {
+      saving = false;
+      render();
+    }
+    return;
+  }
+  if (action === 'edit') { editingId = btn.dataset.id; confirmDeleteId = null; render(); return; }
+  if (action === 'cancel-edit') { editingId = null; render(); return; }
+  if (action === 'ask-delete') { confirmDeleteId = btn.dataset.id; editingId = null; render(); return; }
+  if (action === 'cancel-delete') { confirmDeleteId = null; render(); return; }
+  if (action === 'up' || action === 'down') {
+    try {
+      state = await api('/api/staff/move', { id: btn.dataset.id, dir: action === 'up' ? -1 : 1, code: sessionCode() });
+      lastJson = JSON.stringify(state);
+      render();
+    } catch (err) { showToast(err.message); }
+    return;
+  }
+  if (action === 'remove-staff') {
+    try {
+      state = await api('/api/staff/remove', { id: btn.dataset.id, code: sessionCode() });
+      lastJson = JSON.stringify(state);
+      confirmDeleteId = null;
+      if (!currentStaff()) {
+        draftName = '';
+        localStorage.removeItem('karatsu-name');
+      }
+      render();
+    } catch (err) { showToast(err.message); }
+    return;
+  }
+  if (action === 'warn') {
+    const next = state.settings.warnAt + Number(btn.dataset.dir);
+    if (next < 1 || next > 6) return;
+    try {
+      state = await api('/api/settings', { warnAt: next, code: sessionCode() });
+      lastJson = JSON.stringify(state);
+      render();
+    } catch (err) { showToast(err.message); }
+    return;
+  }
+  if (action === 'clear-code') {
+    const code = document.getElementById('old-code') ? document.getElementById('old-code').value : '';
+    try {
+      state = await api('/api/settings', { clearCode: true, code });
+      lastJson = JSON.stringify(state);
+      settingsUnlocked = true;
+      sessionStorage.setItem('karatsu-unlock', '1');
+      showToast('合言葉をやめました');
+      render();
+    } catch (err) { showToast(err.message); }
+  }
+});
+
+document.getElementById('app').addEventListener('submit', async (event) => {
+  const form = event.target.closest('form');
+  if (!form) return;
+  event.preventDefault();
+  const action = form.dataset.action;
+  try {
+    if (action === 'save-entry') {
+      if (isClosed(selected)) {
+        showToast('この週は締め切りを過ぎているので、入れられません。');
+        return;
+      }
+      const name = document.getElementById('entry-name').value;
+      const comment = document.getElementById('entry-comment').value;
+      draftName = String(name || '').trim();
+      draftComment = String(comment || '').trim();
+      if (saving) return;
+      saving = true;
+      render();
+      try {
+        state = await api('/api/entry', { name, date: selected, comment, on: true });
+        lastJson = JSON.stringify(state);
+        draftName = String(name || '').trim();
+        draftComment = String(comment || '').trim();
+        localStorage.setItem('karatsu-name', draftName);
+        sheet = null;
+        const [, m, d] = selected.split('-');
+        showToast(Number(m) + '月' + Number(d) + '日を休み希望にしました');
+      } catch (err) {
+        showToast(err.message);
+      } finally {
+        saving = false;
+        render();
+      }
+      return;
+    }
+    if (action === 'add-staff') {
+      const input = form.querySelector('input');
+      state = await api('/api/staff', { name: input.value, code: sessionCode() });
+      lastJson = JSON.stringify(state);
+      input.value = '';
+      showToast('名前を追加しました');
+      render();
+      return;
+    }
+    if (action === 'rename') {
+      const name = form.querySelector('input').value;
+      state = await api('/api/staff/update', { id: form.dataset.id, name, code: sessionCode() });
+      lastJson = JSON.stringify(state);
+      editingId = null;
+      render();
+      return;
+    }
+    if (action === 'unlock') {
+      await api('/api/unlock', { code: document.getElementById('code').value });
+      settingsUnlocked = true;
+      sessionStorage.setItem('karatsu-unlock', '1');
+      sessionStorage.setItem('karatsu-code', document.getElementById('code').value);
+      draftNotice = state.settings.notice;
+      render();
+      return;
+    }
+    if (action === 'save-notice') {
+      draftNotice = document.getElementById('notice').value;
+      state = await api('/api/settings', { notice: draftNotice, code: sessionCode() });
+      lastJson = JSON.stringify(state);
+      draftNotice = state.settings.notice;
+      showToast('案内を保存しました');
+      return;
+    }
+    if (action === 'save-code') {
+      const newCode = document.getElementById('new-code').value;
+      const old = document.getElementById('old-code');
+      state = await api('/api/settings', { newCode, code: old ? old.value : sessionCode() });
+      lastJson = JSON.stringify(state);
+      sessionStorage.setItem('karatsu-code', newCode.trim());
+      settingsUnlocked = true;
+      showToast('合言葉を保存しました');
+      render();
+    }
+  } catch (err) {
+    showToast(err.message);
+  }
+});
+
+function sessionCode() {
+  return sessionStorage.getItem('karatsu-code') || '';
+}
+
+window.addEventListener('resize', fitAsk);
+window.addEventListener('popstate', () => {
+  const next = (location.hash || '#cal').slice(1);
+  screen = ['pick', 'cal', 'settings'].includes(next) ? next : 'cal';
+  render();
+});
+
+async function start() {
+  if (location.protocol === 'file:') {
+    document.getElementById('app').innerHTML = '<section class="card"><h2>開き方</h2><p>「ダブルクリックで開く」から開いてください。</p></section>';
+    return;
+  }
+  try { info = await api('/api/info'); } catch (err) { /* 住所は空のままでよい */ }
+  await refresh();
+  if (location.hash === '#settings') screen = 'settings';
+  else {
+    screen = 'cal';
+    ensureSelected();
+  }
+  history.replaceState({ screen }, '', '#' + screen);
+  render();
+  setInterval(refresh, 8000);
+  window.addEventListener('focus', refresh);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refresh();
+  });
+}
+
+start();
+</script>
+</body>
+</html>
