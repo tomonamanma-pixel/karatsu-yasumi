@@ -1,0 +1,8 @@
+data/
+.local/
+supabase/apply.sql
+supabase/apply.b64
+supabase/part0.txt
+supabase/part1.txt
+supabase/part2.txt
+supabase/build-apply.js
